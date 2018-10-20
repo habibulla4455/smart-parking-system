@@ -1,0 +1,49 @@
+<ion-header>
+  <ion-navbar color="danger">
+    <ion-title>Register</ion-title>
+  </ion-navbar>
+</ion-header>
+ 
+<ion-content class="login-content" padding>
+  <div class="login-box">
+    <img  src="assets/imgs/parking-icon.png" />
+    <form >
+      <ion-row>
+        <ion-col>
+          <ion-list>
+
+              <ion-item>
+                  <ion-label>Account Type</ion-label>
+                  <ion-select >
+                    <ion-option value="user">User</ion-option>
+                    <ion-option value="parking-provider">Parking Provider</ion-option>
+                  </ion-select>
+                </ion-item>
+
+            <ion-item>
+              <ion-label floating>Name</ion-label>
+              <ion-input type="text"></ion-input>
+            </ion-item>
+          
+            <ion-item>
+              <ion-label floating>Email</ion-label>
+              <ion-input type="email"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label floating>Password</ion-label>
+              <ion-input type="password"></ion-input>
+            </ion-item>
+
+          </ion-list>
+        </ion-col>
+      </ion-row>
+      
+      <ion-row>
+        <ion-col class="signup-col">
+          <button ion-button color="danger" full type="submit">Register</button>
+        </ion-col>
+      </ion-row>
+    </form>
+  </div>
+</ion-content>

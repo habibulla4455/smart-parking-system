@@ -1,18 +1,33 @@
-<!--
-  Generated template for the LoginPage page.
-
-  See http://ionicframework.com/docs/components/#navigation for more info on
-  Ionic pages and navigation.
--->
 <ion-header>
-
-  <ion-navbar>
-    <ion-title>login</ion-title>
+  <ion-navbar color="danger">
+    <ion-title>Login</ion-title>
   </ion-navbar>
-
 </ion-header>
-
-
-<ion-content padding>
-
+ 
+<ion-content class="login-content" padding>
+  <div class="login-box">
+    <img  src="assets/imgs/parking-icon.png" />
+    <form >
+      <ion-row>
+        <ion-col>
+          <ion-list inset>
+            <ion-item>
+              <ion-input type="text" placeholder="Email" name="email" required></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input type="password" placeholder="Password" name="password" required></ion-input>
+            </ion-item>
+          </ion-list>
+        </ion-col>
+      </ion-row>
+      
+      <ion-row>
+        <ion-col class="signup-col">
+          <button ion-button color="danger" full type="submit">Login</button>
+        </ion-col>
+      </ion-row>
+    </form>
+    <hr/>
+    <a (click)="goToRegisterPage()">New to smart parking system.</a>
+  </div>
 </ion-content>
