@@ -1,5 +1,7 @@
 {
   "name": "smart-parking-system",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "ionic-angular"
 }

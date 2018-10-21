@@ -10,38 +10,57 @@
     <form >
       <ion-row>
         <ion-col>
+          <div class="validation-error" *ngIf="formInvalid">
+            <p *ngFor="let m of globalErrorMessages">{{ m }}</p>
+          </div>
+            <form [formGroup]="registerForm">
           <ion-list>
 
               <ion-item>
-                  <ion-label>Account Type</ion-label>
-                  <ion-select >
-                    <ion-option value="user">User</ion-option>
-                    <ion-option value="parking-provider">Parking Provider</ion-option>
-                  </ion-select>
-                </ion-item>
-
+                <ion-label>Account Type</ion-label>
+                <ion-select formControlName="accountType" multiple="false">
+                  <ion-option  value="user">User</ion-option>
+                  <ion-option  value="parking-provider">Parking Provider</ion-option>
+                </ion-select>
+              </ion-item>
+              <div class="validation-error" *ngIf="!registerForm.controls.accountType.valid  && (registerForm.controls.accountType.dirty || isSubmit)">
+                  Please select account type.
+              </div>
+                
             <ion-item>
               <ion-label floating>Name</ion-label>
-              <ion-input type="text"></ion-input>
+              <ion-input formControlName="name" type="text"></ion-input>
             </ion-item>
-          
+
+            <div class="validation-error" *ngIf="!registerForm.controls.name.valid  && isSubmit">
+                Name is required field.
+            </div>
+
             <ion-item>
               <ion-label floating>Email</ion-label>
-              <ion-input type="email"></ion-input>
+              <ion-input type="email" formControlName="email" ></ion-input>
             </ion-item>
+
+            <div class="validation-error" *ngIf="!registerForm.controls.email.valid  && (registerForm.controls.email.dirty || isSubmit)">
+                Please enter a email address.
+            </div>
 
             <ion-item>
               <ion-label floating>Password</ion-label>
-              <ion-input type="password"></ion-input>
+              <ion-input type="password" formControlName="password" ></ion-input>
             </ion-item>
+            <div class="validation-error" *ngIf="!registerForm.controls.password.valid  && (registerForm.controls.password.dirty || isSubmit)">
+                Please enter a password.
+            </div>
 
           </ion-list>
+        </form>
         </ion-col>
       </ion-row>
       
       <ion-row>
         <ion-col class="signup-col">
-          <button ion-button color="danger" full type="submit">Register</button>
+          <button (click)="registration()" ion-button color="danger" full type="submit">Register</button>
         </ion-col>
       </ion-row>
     </form>

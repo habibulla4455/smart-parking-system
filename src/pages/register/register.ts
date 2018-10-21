@@ -1,12 +1,8 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
-
-/**
- * Generated class for the RegisterPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { HomePage } from '../home/home';
 
 @IonicPage()
 @Component({
@@ -15,11 +11,54 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
 })
 export class RegisterPage {
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
+  registerForm: FormGroup;
+  formInvalid = false;
+  isSubmit = false;
+  globalErrorMessages = [];
+  public accountTypeOptions = [
+    {
+      slug: 'user',
+      title: 'User'
+    },
+    {
+      slug: 'parking-provider',
+      title: 'Parking Provider'
+    }
+  ]
+  
+  constructor(public navCtrl: NavController, public navParams: NavParams, public formBuilder: FormBuilder, public afAuth: AngularFireAuth) {
+    this.registerForm = formBuilder.group({
+        name: ['', Validators.required],
+        email: ['', Validators.required],
+        password: ['', Validators.required],
+        accountType: ['', Validators.required]
+    });
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad RegisterPage');
+  }
+
+
+  registration() {
+    this.isSubmit = true;
+    if (this.registerForm.valid) {
+      this.formInvalid = false;
+      this.globalErrorMessages = [];
+      this.afAuth.auth.createUserWithEmailAndPassword(this.registerForm.controls.email.value, this.registerForm.controls.password.value).then( (res) => {
+          // this.navCtrl.push(HomePage);
+          this.navCtrl.setRoot(HomePage);
+          console.log('successfully logged in')
+      }).catch( (e) => {
+        this.formInvalid = true;
+          this.globalErrorMessages = [];
+          this.globalErrorMessages.push(e['message']);
+      })
+      // this.afAuth.auth.signInWithPopup(new auth.GoogleAuthProvider());
+    } else {
+      this.formInvalid = true;
+      this.globalErrorMessages = [];
+      this.globalErrorMessages.push('Please fill out all details accurately.');
+    }
   }
 
 }
