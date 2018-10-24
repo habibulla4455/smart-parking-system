@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
 import { RegisterPage } from '../register/register';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { HomePage } from '../home/home';
@@ -14,7 +14,11 @@ export class LoginPage {
   email = '';
   password = '';
   errorMessages = '';
-  constructor(public navCtrl: NavController, public navParams: NavParams, public afAuth: AngularFireAuth) {
+  public loader;
+  constructor(public navCtrl: NavController, public navParams: NavParams, public afAuth: AngularFireAuth, public loadingCtrl: LoadingController) {
+    this.loader = this.loadingCtrl.create({
+      content: 'Loading...'
+    });
   }
 
   ionViewDidLoad() {
@@ -26,12 +30,14 @@ export class LoginPage {
   }
 
   login() {
+    this.loader.present();
     this.afAuth.auth.signInAndRetrieveDataWithEmailAndPassword(this.email, this.password).then( (res) => {
       this.errorMessages = '';
+      this.loader.dismiss();
       this.navCtrl.setRoot(HomePage);
     }).catch( (e) => {
+      this.loader.dismiss();
       this.errorMessages = e.message;
     })
-    console.log(this.email);
   }
 }
