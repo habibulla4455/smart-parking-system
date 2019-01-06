@@ -1,3 +1,26 @@
-page-home {
+.fab {
+  contain: initial;
+  box-shadow: 0px 1px 1px 1px #eee;
+}
 
+ion-fab {
+  ion-fab-list button[ion-fab] {
+    overflow: visible;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+
+    div.label {
+      position: absolute;
+      right: 48px;
+      background: rgba(0, 0, 0, 0.7);
+      height: 24px;
+      line-height: 16px;
+      padding-left: 8px;
+      padding-right: 8px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      border-radius: 3px;
+      color: #fff;
+    }
+  }
 }

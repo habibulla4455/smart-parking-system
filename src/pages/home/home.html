@@ -3,9 +3,27 @@
     <ion-title>
       Smart Parking Systems
     </ion-title>
+    <ion-buttons end>
+        <button (click)="logout()" ion-button icon-only>
+            <ion-icon name="log-out"></ion-icon>
+          </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
     <div id="map" style="width:100%; height:100%;"></div>
+    
+    <ion-fab bottom right #fab>
+        <button ion-fab ><ion-icon name="add"></ion-icon></button>
+        <ion-fab-list side="top">
+  
+          <button (click)="addParking(fab)" ion-fab [style.background-color]="color">
+              <ion-icon name="locate"></ion-icon>
+              <div class="label">Add Parking</div>
+          </button>
+         
+      </ion-fab-list>
+  </ion-fab>
+
 </ion-content>

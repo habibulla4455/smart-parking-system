@@ -3,6 +3,7 @@ import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-an
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFireDatabase } from '@angular/fire/database';
+import { Storage } from '@ionic/storage';
 
 import { HomePage } from '../home/home';
 
@@ -29,7 +30,7 @@ export class RegisterPage {
     }
   ]
   
-  constructor(public navCtrl: NavController, public navParams: NavParams, public formBuilder: FormBuilder, public afAuth: AngularFireAuth, public afDb: AngularFireDatabase, public loadingCtrl: LoadingController) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public formBuilder: FormBuilder, public afAuth: AngularFireAuth, public afDb: AngularFireDatabase, public loadingCtrl: LoadingController, private storage: Storage) {
     this.registerForm = formBuilder.group({
         name: ['', Validators.required],
         email: ['', Validators.required],
@@ -54,7 +55,11 @@ export class RegisterPage {
       this.afAuth.auth.createUserWithEmailAndPassword(this.registerForm.controls.email.value, this.registerForm.controls.password.value).then( (res) => {
           /* save user information */
           this.loader.dismiss();
-          this.afDb.object(res.user.uid).set({name: this.registerForm.controls.name.value, email: this.registerForm.controls.email.value, accountType: this.registerForm.controls.accountType.value}).then( r => {
+          this.afDb.object('users/'+res.user.uid).set({name: this.registerForm.controls.name.value, email: this.registerForm.controls.email.value, accountType: this.registerForm.controls.accountType.value}).then( r => {
+            this.storage.set('token', res.user.uid);
+            this.storage.set('accountType', this.registerForm.controls.accountType.value);
+            this.storage.set('email', this.registerForm.controls.email.value);
+            this.storage.set('name', this.registerForm.controls.name.value);
             this.navCtrl.setRoot(HomePage);
           }).catch( e => {
             this.loader.dismiss();
@@ -68,7 +73,6 @@ export class RegisterPage {
         this.globalErrorMessages = [];
         this.globalErrorMessages.push(e['message']);
       })
-      // this.afAuth.auth.signInWithPopup(new auth.GoogleAuthProvider());
     } else {
       this.loader.dismiss();
       this.formInvalid = true;
