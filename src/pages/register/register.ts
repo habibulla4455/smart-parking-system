@@ -62,7 +62,7 @@ export class RegisterPage {
             this.storage.set('name', this.registerForm.controls.name.value);
             this.navCtrl.setRoot(HomePage);
           }).catch( e => {
-            this.loader.dismiss();
+            //this.loader.dismiss();
             this.formInvalid = true;
             this.globalErrorMessages = [];
             this.globalErrorMessages.push(e['message']);

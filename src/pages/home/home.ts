@@ -5,8 +5,11 @@ import { FabContainer } from 'ionic-angular';
 import { AlertController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { AngularFireDatabase } from '@angular/fire/database';
+import { Geolocation } from '@ionic-native/geolocation';
+import moment from 'moment';
 
 import { LoginPage } from '../login/login';
+import { ReportPage } from '../report/report';
 
 @Component({
   selector: 'page-home',
@@ -27,18 +30,33 @@ export class HomePage {
     lat: 0,
     lng: 0
   };
-  constructor(public navCtrl: NavController, private el: ElementRef, private alertCtrl: AlertController, private storage: Storage, public afDb: AngularFireDatabase) {
+  userPaymentMarker;
+  leafRC;
+
+
+  constructor(public navCtrl: NavController, private el: ElementRef, private alertCtrl: AlertController, private storage: Storage, public afDb: AngularFireDatabase, private geolocation: Geolocation) {
     //storage.clear();
     storage.get('accountType').then(r => {
       this.accountType = r;
-      console.log(this.accountType);
+      this.loadMarkersBasedOnAccount();
     })
   }
 
   ionViewDidEnter() {
     this.loadmap();
     //this.presentPrompt();
-    this.renderUserMarker();
+    
+  }
+
+  loadMarkersBasedOnAccount() {
+    console.log('accountType', this.accountType);
+    if(this.accountType == 'user'){
+      
+      this.renderUserPosition();
+      this.chkCurrentParkedVehical();
+    } else {
+      this.renderUserMarker();
+    }
   }
 
    /* Map Init*/
@@ -217,11 +235,7 @@ export class HomePage {
         
       })
       }
-    });
-
-
-
-   
+    });   
   }
 
   updateParking(res, data){
@@ -256,25 +270,174 @@ export class HomePage {
           for (let i in r){
 
             let nm = leaflet.marker([r[i].lat, r[i].lng], { icon: greenIcon, draggable: false }).addTo(
-              this.map).bindPopup('<h3>'+r[i].name+'</h3><strong>Total Space: '+r[i].slots+'</strong><br><strong>Available Space: '+r[i].available+'</strong><br><strong>Price/hr:</strong> '+r[i].price+'<br/><button class="button-ios button-ios-secondary" ion-button round>Details</button><button data-value="'+i+'" class="button-ios button-ios-info EditParkingCls" ion-button round>Edit</button><button data-value="'+i+'" class="button-ios button-ios-danger  DeleteParkingCls" ion-button round>Delete</button>.').on('popupopen', (d) => {
+              this.map).bindPopup('<h3>'+r[i].name+'</h3><strong>Total Space: '+r[i].slots+'</strong><br><strong>Available Space: '+r[i].available+'</strong><br><strong>Price/hr:</strong> '+r[i].price+'<br/><button data-value="'+i+'" class="button-ios button-ios-info EditParkingCls" ion-button round>Edit</button><button data-value="'+i+'" class="button-ios button-ios-danger  DeleteParkingCls" ion-button round>Delete</button>.').on('popupopen', (d) => {
                     this.el.nativeElement.querySelector('button.DeleteParkingCls').addEventListener('click', (event) => this.deleteParking(event));
                     this.el.nativeElement.querySelector('button.EditParkingCls').addEventListener('click', (event) => this.editParking(event));
                   });
                   initMarkers.push({slug: r[i].slug, ref: nm});
           }
         })
-      } else {
-        let altr = this.alertCtrl.create({
-          title: 'Something went wrong please try again!'
-        })
-        altr.present();
-      }      
+      }     
     });
   }
 
   logout() {
     this.storage.clear();
     this.navCtrl.setRoot(LoginPage);
+  }
+
+
+
+
+  /* user functionality */
+
+  renderAllMarker() {
+    let parkings;
+    let initMarkers = this.initMarkers;
+    let greenIcon = leaflet.icon({
+      iconUrl: 'assets/imgs/parking.png',
+      iconSize: [35, 40],
+    });
+        parkings = this.afDb.object('parking/').valueChanges();
+        console.log(parkings);
+        parkings.forEach((r) => {
+          
+          for (let i in r){
+            let newD = r[i];
+            for(let j in newD) {
+              console.log(newD[j])
+              let md = newD[j];
+              let nm = leaflet.marker([md.lat, md.lng], { icon: greenIcon, draggable: false }).addTo(
+              this.map).bindPopup('<h3>'+md.name+'</h3><strong>Total Space: '+md.slots+'</strong><br><strong>Available Space: '+md.available+'</strong><br><strong>Price/hr:</strong> '+md.price+'<br/><button data-value="'+i+'" data-slug="'+md.slug+'" class="button-ios button-ios-info EditParkingCls" ion-button round>Book</button>').on('popupopen', (d) => {
+                    // this.el.nativeElement.querySelector('button.DeleteParkingCls').addEventListener('click', (event) => this.deleteParking(event));
+                    this.el.nativeElement.querySelector('button.EditParkingCls').addEventListener('click', (event) => this.bookParking(event));
+                  });
+                  initMarkers.push({slug: md.slug, ref: nm});
+            }         
+          }
+        })
+  }
+
+  renderUserPosition(){
+    let greenIcon = leaflet.icon({
+      iconUrl: 'assets/imgs/CarMarker.png',
+      iconSize: [30, 40],
+    });
+    this.geolocation.getCurrentPosition().then((resp) => {
+      // resp.coords.latitude
+      // resp.coords.longitude
+      let nm = leaflet.marker([resp.coords.latitude, resp.coords.longitude], { icon: greenIcon, draggable: false }).addTo(this.map);
+      console.log(resp);
+     }).catch((error) => {
+       console.log('Error getting location', error);
+     });
+  }
+
+  bookParking(evt) {
+    let parkingUID = evt.path[0].dataset.value;
+    let parkingSlug = evt.path[0].dataset.slug;
+
+    console.log(parkingUID);
+    this.storage.get('token').then(userId => {
+      let parkingData = this.afDb.object('parking/'+parkingUID+'/'+parkingSlug).valueChanges();
+      let cnt = 0;
+      parkingData.forEach( (r) => {
+        let available = r['available'];
+        if(cnt == 0){
+          +available--;
+          cnt++;
+        }
+        
+        if(+available <= 0){
+          console.log(available);
+        } else {
+          r['available'] = available;
+          this.afDb.object('parking/'+parkingUID+'/'+parkingSlug).set(r);
+          r['startDate'] = moment().format();
+          this.afDb.object('user-parking/'+userId + '/' + parkingSlug).set(r).then( () => {
+            window.location.reload();
+          });
+          //this.navCtrl.setRoot(this.navCtrl.getActive().component);
+          
+        }
+      })
+    })
+
+    // this.afDb.object('users/'+res.user.uid).set({});
+  }
+
+  chkCurrentParkedVehical() {
+    let __this = this;
+    this.storage.get('token').then(userId => {
+      let parkingData = this.afDb.object('user-parking/'+userId).valueChanges();
+      if(Object.keys(parkingData).length <= 0){
+        this.renderAllMarker();
+      }
+      parkingData.forEach( (r) => {
+        if(r === null){
+          this.renderAllMarker();
+        }
+
+        for(let s in r) {
+          let d = r[s];
+          var duration = moment.duration(moment().diff(moment(d.startDate)));
+          var hours = Math.round(duration.asHours());
+          let charge = hours * d.price;
+          this.geolocation.getCurrentPosition().then((resp) => {
+            this.leafRC = leaflet.Routing.control({
+              
+              waypoints: [
+                leaflet.latLng(resp.coords.latitude, resp.coords.longitude),
+                leaflet.latLng(d['lat'], d['lng'])
+              ],
+              routeWhileDragging: true,
+              createMarker: function(i, wp, nWps) {
+                this.userPaymentMarker = leaflet.marker(wp.latLng).bindPopup('<h3>'+d.name+'</h3><strong>Total fff Space: '+d.slots+'</strong><br><strong>Parking Charge: Rs. '+charge+'</strong><br><strong>Price/hr:</strong> '+d.price+'<br/><button  data-uid="'+userId+'" data-price="'+charge+'" data-slug="'+d.slug+'" class="button-ios button-ios-info ExitParkingCls" id="find-me" ion-button round>Exit</button>').on('popupopen', (d) => {
+                  document.getElementById("find-me").addEventListener('click', (event) => __this.exitParkingFn(event));
+                })
+                return i == 1 ? this.userPaymentMarker : '';
+            }
+          }).addTo(this.map);
+
+           }).catch((error) => {
+             console.log('Error getting location', error);
+           });
+        }
+      })
+    })
+  }
+
+  exitParkingFn(ev){
+    let data = ev.toElement.dataset;
+    let parkingData = this.afDb.object('user-parking/'+data.uid+'/'+data.slug).valueChanges();
+    parkingData.forEach( (r) => {
+      if(r){
+        r['charge'] = data.price;
+        r['exitDate'] = moment().format();
+        this.afDb.object('user-report/'+data.uid+'/'+data.slug).set(r);
+        
+        this.leafRC.spliceWaypoints(0, 2);
+        this.afDb.object('user-parking/'+data.uid+'/'+data.slug).remove();
+      }
+    });
+    
+  }
+
+  testfunction() {
+    console.log('in test function')
+
+    // .bindPopup('<h3>'+d.name+'</h3><strong>Total fff Space: '+d.slots+'</strong><br><strong>Parking Charge: Rs. '+charge+'</strong><br><strong>Price/hr:</strong> '+d.price+'<br/><button class="button-ios button-ios-secondary" ion-button round>Details</button><button data-value="'+i+'" data-slug="'+d.slug+'" class="button-ios button-ios-info ExitParkingCls" (click)="testfunction()" ion-button round>Exit</button>').on('popupopen', (d) => {
+    //   // this.el.nativeElement.querySelector('button.DeleteParkingCls').addEventListener('click', (event) => this.deleteParking(event));
+    //   // setTimeout(() => {
+
+    //     this.el.nativeElement.querySelector('button').addEventListener('click', (event) => console.log(event));
+    //   // }, 1000);
+    //   console.log('opoup opened')
+    // })
+  }
+
+  goAnReportPage() {
+    this.navCtrl.setRoot(ReportPage);
   }
 }
 

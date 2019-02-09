@@ -18,10 +18,20 @@
         <button ion-fab ><ion-icon name="add"></ion-icon></button>
         <ion-fab-list side="top">
   
-          <button (click)="addParking(fab)" ion-fab [style.background-color]="color">
+          <button *ngIf="accountType != 'user'" (click)="addParking(fab)" ion-fab [style.background-color]="color">
               <ion-icon name="locate"></ion-icon>
               <div class="label">Add Parking</div>
           </button>
+
+          <button *ngIf="accountType == 'user'" onclick="window.location.reload()" ion-fab [style.background-color]="color">
+            <ion-icon name="refresh"></ion-icon>
+            <div class="label">Refresh</div>
+        </button>
+
+        <button *ngIf="accountType == 'user'" (click)="goAnReportPage()" ion-fab [style.background-color]="color">
+          <ion-icon name="document"></ion-icon>
+          <div class="label">Reports</div>
+      </button>
          
       </ion-fab-list>
   </ion-fab>

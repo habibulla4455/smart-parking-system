@@ -11,12 +11,13 @@ import { environment } from '../environment/environment';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
 
 import { IonicStorageModule } from '@ionic/storage';
-
+import { Geolocation } from '@ionic-native/geolocation';
 
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { LoginPage } from '../pages/login/login';
 import { RegisterPage } from '../pages/register/register';
+import { ReportPageModule } from '../pages/report/report.module'
 import { AuthProvider } from '../providers/auth/auth';
 
 @NgModule({
@@ -34,7 +35,8 @@ import { AuthProvider } from '../providers/auth/auth';
     AngularFireDatabaseModule,
     AngularFirestoreModule, // imports firebase/firestore, only needed for database features
     AngularFireAuthModule, // imports firebase/auth, only needed for auth features,
-    AngularFireStorageModule // imports firebase/storage only needed for storage features
+    AngularFireStorageModule, // imports firebase/storage only needed for storage features
+    ReportPageModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -47,7 +49,8 @@ import { AuthProvider } from '../providers/auth/auth';
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    AuthProvider
+    AuthProvider,
+    Geolocation
   ]
 })
 export class AppModule {}

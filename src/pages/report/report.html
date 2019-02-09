@@ -1,0 +1,24 @@
+<ion-header>
+  <ion-navbar color="danger">
+      <ion-buttons start>
+          <button (click)="goToHomePage()" ion-button icon-only>
+              <ion-icon name="arrow-back"></ion-icon>
+            </button>
+      </ion-buttons>
+    <ion-title>Reports</ion-title>
+  </ion-navbar>
+</ion-header>
+ 
+<ion-content class="login-content" padding>
+  <ion-card *ngFor="let i of reports">
+    <ion-card-header>
+      {{ i.name }}
+    </ion-card-header>
+    <ion-card-content>
+      Parking price per hour : {{ i.price }} <br/>
+      Start Time : {{ i.startDate  | date:'dd-mm-yyyy hh:mm'}} <br/>
+      Exit Time : {{ i.exitDate  | date:'dd-mm-yyyy hh:mm'}} <br/>
+      Total Charge : {{ i.charge }} <br/>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
