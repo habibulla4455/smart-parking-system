@@ -42,11 +42,19 @@ export class LoginPage {
       this.data.forEach((r) => {
         for (let i in r){
           this.storage.set(i, r[i]);
-        }        
+        }
+      }).then( () => {
+        this.errorMessages = '';
+        this.loader.dismiss();
+        this.navCtrl.setRoot(HomePage);
       })
-      this.errorMessages = '';
-      this.loader.dismiss();
-      this.navCtrl.setRoot(HomePage);
+
+      setTimeout( (r) => {
+        this.errorMessages = '';
+        this.loader.dismiss();
+        this.navCtrl.setRoot(HomePage);
+      }, 1000)
+      
     }).catch( (e) => {
       this.loader.dismiss();
       this.errorMessages = e.message;

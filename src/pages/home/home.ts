@@ -2,13 +2,12 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import leaflet from 'leaflet';
 import { FabContainer } from 'ionic-angular';
-import { AlertController, ModalController, ModalOptions } from 'ionic-angular';
+import { AlertController, ModalController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Geolocation } from '@ionic-native/geolocation';
 import moment from 'moment';
 
-import { LoginPage } from '../login/login';
 import { ReportPage } from '../report/report';
 import { PaypopupPage } from '../paypopup/paypopup';
 
@@ -36,23 +35,24 @@ export class HomePage {
 
 
   constructor(public navCtrl: NavController, private el: ElementRef, private alertCtrl: AlertController, private storage: Storage, public afDb: AngularFireDatabase, private geolocation: Geolocation, public modalCtrl: ModalController  ) {
-    //storage.clear();
-    storage.get('accountType').then(r => {
-      this.accountType = r;
-      this.loadMarkersBasedOnAccount();
-    })
   }
 
   ionViewDidEnter() {
     this.loadmap();
-    //this.presentPrompt();
-    
+    this.storage.get('accountType').then(r => {
+      this.accountType = r;
+      this.loadMarkersBasedOnAccount();
+    });    
   }
 
   loadMarkersBasedOnAccount() {
-    console.log('accountType', this.accountType);
+    if(this.accountType === null){
+      this.storage.get('accountType').then(r => {
+        this.accountType = r;
+      })
+    }
+
     if(this.accountType == 'user'){
-      
       this.renderUserPosition();
       this.chkCurrentParkedVehical();
     } else {
@@ -85,7 +85,10 @@ export class HomePage {
       iconUrl: 'assets/imgs/new-marker.png',
       iconSize: [50, 50],
     });
-    this.newm = leaflet.marker([this.userLatLng.lat, this.userLatLng.lng], { icon: greenIcon, draggable: true }).addTo(this.map)
+    this.geolocation.getCurrentPosition().then((resp) => {
+      // leaflet.marker([resp.coords.latitude, resp.coords.longitude], { icon: greenIcon, draggable: false }).addTo(this.map);
+      
+      this.newm = leaflet.marker([resp.coords.latitude, resp.coords.longitude], { icon: greenIcon, draggable: true }).addTo(this.map)
       .bindPopup('<strong>Select Location</strong><br>Pin the parking point<br/><button (click)="newParkingForm()" id="sunilTest" class="button-ios button-block" ion-button round>Select</button>.')
       .openPopup().on('dragend', (d) => {
           this.newLatLng = d.target._latlng;
@@ -98,7 +101,10 @@ export class HomePage {
       this.subscribeToClickListeners();
     });
     this.subscribeToClickListeners();
-    console.log('Event: add parking');
+    
+    }).catch((error) => {
+      });
+    
   }
 
   /* lat lng select listener for new parking */
@@ -173,7 +179,6 @@ export class HomePage {
   }
 
   deleteParking(ele) {
-    console.log(ele);
     this.storage.get('token').then((uid) => {
       if(uid) {
       this.afDb.object('parking/'+uid+'/'+ele.path[0].dataset.value).remove().then( () => {
@@ -188,7 +193,6 @@ export class HomePage {
   }
 
   editParking(ele){
-    console.log(ele);
     let isEdit = true;
     this.storage.get('token').then((uid) => {
       if(uid && isEdit) {
@@ -283,8 +287,11 @@ export class HomePage {
   }
 
   logout() {
-    this.storage.clear();
-    this.navCtrl.setRoot(LoginPage);
+
+    if(this.storage.clear()) {
+      window.location.reload();
+    }
+    //this.navCtrl.setRoot(LoginPage);
   }
 
 
@@ -301,21 +308,20 @@ export class HomePage {
       iconSize: [35, 40],
     });
         parkings = this.afDb.object('parking/').valueChanges();
-        console.log(parkings);
         parkings.forEach((r) => {
-          
           for (let i in r){
             let newD = r[i];
             for(let j in newD) {
-              console.log(newD[j])
               let md = newD[j];
+              console.log(md.name);
               let nm = leaflet.marker([md.lat, md.lng], { icon: greenIcon, draggable: false }).addTo(
               this.map).bindPopup('<h3>'+md.name+'</h3><strong>Total Space: '+md.slots+'</strong><br><strong>Available Space: '+md.available+'</strong><br><strong>Price/hr:</strong> '+md.price+'<br/><button data-value="'+i+'" data-slug="'+md.slug+'" class="button-ios button-ios-info EditParkingCls" ion-button round>Book</button>').on('popupopen', (d) => {
                     // this.el.nativeElement.querySelector('button.DeleteParkingCls').addEventListener('click', (event) => this.deleteParking(event));
                     this.el.nativeElement.querySelector('button.EditParkingCls').addEventListener('click', (event) => this.bookParking(event));
                   });
                   initMarkers.push({slug: md.slug, ref: nm});
-            }         
+              console.log(nm);
+            }
           }
         })
   }
@@ -326,12 +332,8 @@ export class HomePage {
       iconSize: [30, 40],
     });
     this.geolocation.getCurrentPosition().then((resp) => {
-      // resp.coords.latitude
-      // resp.coords.longitude
-      let nm = leaflet.marker([resp.coords.latitude, resp.coords.longitude], { icon: greenIcon, draggable: false }).addTo(this.map);
-      console.log(resp);
+     leaflet.marker([resp.coords.latitude, resp.coords.longitude], { icon: greenIcon, draggable: false }).addTo(this.map);
      }).catch((error) => {
-       console.log('Error getting location', error);
      });
   }
 
@@ -340,14 +342,12 @@ export class HomePage {
       iconUrl: 'assets/imgs/clg.png',
       iconSize: [30, 40],
     });
-      let nm = leaflet.marker([21.248337, 79.048064], { icon: greenIcon, draggable: false }).addTo(this.map);
+      leaflet.marker([21.248337, 79.048064], { icon: greenIcon, draggable: false }).addTo(this.map).bindPopup('<h3>JIT Nagpur</h3>');
   }
 
   bookParking(evt) {
     let parkingUID = evt.path[0].dataset.value;
     let parkingSlug = evt.path[0].dataset.slug;
-
-    console.log(parkingUID);
     this.storage.get('token').then(userId => {
       let parkingData = this.afDb.object('parking/'+parkingUID+'/'+parkingSlug).valueChanges();
       let cnt = 0;
@@ -357,19 +357,12 @@ export class HomePage {
           +available--;
           cnt++;
         }
-        
-        // if(+available <= 0){
-        //   console.log(available);
-        // } else {
           r['available'] = available;
           this.afDb.object('parking/'+parkingUID+'/'+parkingSlug).set(r);
           r['startDate'] = moment().format();
           this.afDb.object('user-parking/'+userId + '/' + parkingSlug).set(r).then( () => {
             window.location.reload();
           });
-          //this.navCtrl.setRoot(this.navCtrl.getActive().component);
-          
-        // }
       })
     })
 
@@ -410,7 +403,6 @@ export class HomePage {
           }).addTo(this.map);
 
            }).catch((error) => {
-             console.log('Error getting location', error);
            });
         }
       })
@@ -435,16 +427,6 @@ export class HomePage {
   }
 
   testfunction() {
-    console.log('in test function')
-
-    // .bindPopup('<h3>'+d.name+'</h3><strong>Total fff Space: '+d.slots+'</strong><br><strong>Parking Charge: Rs. '+charge+'</strong><br><strong>Price/hr:</strong> '+d.price+'<br/><button class="button-ios button-ios-secondary" ion-button round>Details</button><button data-value="'+i+'" data-slug="'+d.slug+'" class="button-ios button-ios-info ExitParkingCls" (click)="testfunction()" ion-button round>Exit</button>').on('popupopen', (d) => {
-    //   // this.el.nativeElement.querySelector('button.DeleteParkingCls').addEventListener('click', (event) => this.deleteParking(event));
-    //   // setTimeout(() => {
-
-    //     this.el.nativeElement.querySelector('button').addEventListener('click', (event) => console.log(event));
-    //   // }, 1000);
-    //   console.log('opoup opened')
-    // })
   }
 
   goAnReportPage() {
@@ -452,10 +434,6 @@ export class HomePage {
   }
 
   showPaymentPopup(data) {
-    console.log('in fn')
-    // const modalOptions: ModalOptions = {
-    //   cssClass: "signInModal"
-    // };
     const modal = this.modalCtrl.create(PaypopupPage, data);
     modal.present();
   }
