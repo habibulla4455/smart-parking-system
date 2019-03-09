@@ -16,6 +16,7 @@ import { Geolocation } from '@ionic-native/geolocation';
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { LoginPage } from '../pages/login/login';
+import { PaypopupPage } from '../pages/paypopup/paypopup';
 import { RegisterPage } from '../pages/register/register';
 import { ReportPageModule } from '../pages/report/report.module'
 import { AuthProvider } from '../providers/auth/auth';
@@ -25,7 +26,8 @@ import { AuthProvider } from '../providers/auth/auth';
     MyApp,
     HomePage,
     LoginPage,
-    RegisterPage
+    RegisterPage,
+    PaypopupPage
   ],
   imports: [
     BrowserModule,
@@ -43,7 +45,8 @@ import { AuthProvider } from '../providers/auth/auth';
     MyApp,
     LoginPage,
     RegisterPage,
-    HomePage
+    HomePage,
+    PaypopupPage
   ],
   providers: [
     StatusBar,

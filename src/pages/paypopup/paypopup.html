@@ -1,0 +1,21 @@
+<ion-content class="main-view">
+  <div class="overlay" (click)="dismiss()"></div>
+  <ion-scroll class="modal_content" scrollY="true">
+
+    <div class="iconDiv">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+    </div>
+      
+    <br/>
+    <small>TOTAL PARKING FARE.</small>
+    <h1>Rs. {{ price }}</h1>
+    <small>TOTAL PARKING DURATION: {{ hour }} hr.</small>
+    <hr/>
+    <div class="paymentDatails"> 
+        Payment ref. - {{ uid | slice:0:16 }}
+        <br/>
+        Payment Date - {{ exitDate | date }}
+    </div>
+    
+  </ion-scroll>
+</ion-content>

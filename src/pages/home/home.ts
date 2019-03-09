@@ -2,7 +2,7 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import leaflet from 'leaflet';
 import { FabContainer } from 'ionic-angular';
-import { AlertController } from 'ionic-angular';
+import { AlertController, ModalController, ModalOptions } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Geolocation } from '@ionic-native/geolocation';
@@ -10,6 +10,7 @@ import moment from 'moment';
 
 import { LoginPage } from '../login/login';
 import { ReportPage } from '../report/report';
+import { PaypopupPage } from '../paypopup/paypopup';
 
 @Component({
   selector: 'page-home',
@@ -34,7 +35,7 @@ export class HomePage {
   leafRC;
 
 
-  constructor(public navCtrl: NavController, private el: ElementRef, private alertCtrl: AlertController, private storage: Storage, public afDb: AngularFireDatabase, private geolocation: Geolocation) {
+  constructor(public navCtrl: NavController, private el: ElementRef, private alertCtrl: AlertController, private storage: Storage, public afDb: AngularFireDatabase, private geolocation: Geolocation, public modalCtrl: ModalController  ) {
     //storage.clear();
     storage.get('accountType').then(r => {
       this.accountType = r;
@@ -292,6 +293,7 @@ export class HomePage {
   /* user functionality */
 
   renderAllMarker() {
+    this.renderCollegeMarker();
     let parkings;
     let initMarkers = this.initMarkers;
     let greenIcon = leaflet.icon({
@@ -333,6 +335,14 @@ export class HomePage {
      });
   }
 
+  renderCollegeMarker(){
+    let greenIcon = leaflet.icon({
+      iconUrl: 'assets/imgs/clg.png',
+      iconSize: [30, 40],
+    });
+      let nm = leaflet.marker([21.248337, 79.048064], { icon: greenIcon, draggable: false }).addTo(this.map);
+  }
+
   bookParking(evt) {
     let parkingUID = evt.path[0].dataset.value;
     let parkingSlug = evt.path[0].dataset.slug;
@@ -348,9 +358,9 @@ export class HomePage {
           cnt++;
         }
         
-        if(+available <= 0){
-          console.log(available);
-        } else {
+        // if(+available <= 0){
+        //   console.log(available);
+        // } else {
           r['available'] = available;
           this.afDb.object('parking/'+parkingUID+'/'+parkingSlug).set(r);
           r['startDate'] = moment().format();
@@ -359,7 +369,7 @@ export class HomePage {
           });
           //this.navCtrl.setRoot(this.navCtrl.getActive().component);
           
-        }
+        // }
       })
     })
 
@@ -382,7 +392,7 @@ export class HomePage {
           let d = r[s];
           var duration = moment.duration(moment().diff(moment(d.startDate)));
           var hours = Math.round(duration.asHours());
-          let charge = hours * d.price;
+          let charge = d.price + (hours * d.price);
           this.geolocation.getCurrentPosition().then((resp) => {
             this.leafRC = leaflet.Routing.control({
               
@@ -392,7 +402,7 @@ export class HomePage {
               ],
               routeWhileDragging: true,
               createMarker: function(i, wp, nWps) {
-                this.userPaymentMarker = leaflet.marker(wp.latLng).bindPopup('<h3>'+d.name+'</h3><strong>Total fff Space: '+d.slots+'</strong><br><strong>Parking Charge: Rs. '+charge+'</strong><br><strong>Price/hr:</strong> '+d.price+'<br/><button  data-uid="'+userId+'" data-price="'+charge+'" data-slug="'+d.slug+'" class="button-ios button-ios-info ExitParkingCls" id="find-me" ion-button round>Exit</button>').on('popupopen', (d) => {
+                this.userPaymentMarker = leaflet.marker(wp.latLng).bindPopup('<h3>'+d.name+'</h3><strong>Total fff Space: '+d.slots+'</strong><br><strong>Parking Charge: Rs. '+charge+'</strong><br><strong>Price/hr:</strong> '+d.price+'<br/><button  data-uid="'+userId+'" data-price="'+charge+'" data-hour="'+hours+'" data-slug="'+d.slug+'" class="button-ios button-ios-info ExitParkingCls" id="find-me" ion-button round>Exit</button>').on('popupopen', (d) => {
                   document.getElementById("find-me").addEventListener('click', (event) => __this.exitParkingFn(event));
                 })
                 return i == 1 ? this.userPaymentMarker : '';
@@ -415,7 +425,8 @@ export class HomePage {
         r['charge'] = data.price;
         r['exitDate'] = moment().format();
         this.afDb.object('user-report/'+data.uid+'/'+data.slug).set(r);
-        
+        r['hour'] = data.hour;
+        this.showPaymentPopup(r);
         this.leafRC.spliceWaypoints(0, 2);
         this.afDb.object('user-parking/'+data.uid+'/'+data.slug).remove();
       }
@@ -438,6 +449,15 @@ export class HomePage {
 
   goAnReportPage() {
     this.navCtrl.setRoot(ReportPage);
+  }
+
+  showPaymentPopup(data) {
+    console.log('in fn')
+    // const modalOptions: ModalOptions = {
+    //   cssClass: "signInModal"
+    // };
+    const modal = this.modalCtrl.create(PaypopupPage, data);
+    modal.present();
   }
 }
 

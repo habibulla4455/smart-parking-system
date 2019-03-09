@@ -21,18 +21,19 @@ export class ReportPage {
   }
 
   ionViewDidLoad() {
+    console.log('user-report/'+this.uid);
     let reports = this.afDb.object('user-report/'+this.uid).valueChanges();
-    reports.forEach((r) => {
-          
-      for (let i in r){
+    reports.forEach((r) => {          
+      for (let i in r) {
         let newD = r[i];
+        console.log(newD);
         for( let j in newD ) {
           this.reports.push(newD[j]);
-        }      
+        }        
+        console.log(this.reports);
       }
-    })
+    });
   }
-
 
   goToHomePage() {
     this.navCtrl.setRoot(HomePage);
