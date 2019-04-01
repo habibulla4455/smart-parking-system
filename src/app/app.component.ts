@@ -13,7 +13,7 @@ export class MyApp {
   rootPage:any = HomePage;
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, private storage: Storage) {
-    storage.get('token').then((val) => {
+    this.storage.get('token').then((val) => {
       if(val) {
         this.rootPage = HomePage;
       } else {

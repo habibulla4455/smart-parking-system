@@ -338,11 +338,11 @@ export class HomePage {
   }
 
   renderCollegeMarker(){
-    let greenIcon = leaflet.icon({
-      iconUrl: 'assets/imgs/clg.png',
-      iconSize: [30, 40],
-    });
-      leaflet.marker([21.248337, 79.048064], { icon: greenIcon, draggable: false }).addTo(this.map).bindPopup('<h3>JIT Nagpur</h3>');
+    // let greenIcon = leaflet.icon({
+    //   iconUrl: 'assets/imgs/clg.png',
+    //   iconSize: [30, 40],
+    // });
+    //   leaflet.marker([21.248337, 79.048064], { icon: greenIcon, draggable: false }).addTo(this.map).bindPopup('<h3>JIT Nagpur</h3>');
   }
 
   bookParking(evt) {

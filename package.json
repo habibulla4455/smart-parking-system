@@ -27,7 +27,7 @@
     "@ionic-native/status-bar": "~4.15.0",
     "@ionic/storage": "^2.2.0",
     "angularfire2": "^5.0.2",
-    "cordova-android": "7.1.1",
+    "cordova-android": "7.1.4",
     "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-geolocation": "4.0.1",
     "cordova-plugin-ionic-keyboard": "^2.1.3",

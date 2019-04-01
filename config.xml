@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.ionic.starter" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.smartparking.devsunil" version="1.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Smart Parking System</name>
     <description>An awesome parking app.</description>
     <author email="sunilnkashyap@gmail.com" href="http://dev-sunil.com/">Dev Sunil</author>
@@ -84,5 +84,5 @@
     <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
     <plugin name="cordova-sqlite-storage" spec="2.6.0" />
     <plugin name="cordova-plugin-geolocation" spec="4.0.1" />
-    <engine name="android" spec="7.1.1" />
+    <engine name="android" spec="7.1.4" />
 </widget>
